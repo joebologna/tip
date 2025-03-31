@@ -1,0 +1,96 @@
+"aluminum oxide":
+  components:
+    - oxygen
+    - aluminum
+water:             
+  components:
+    - oxygen
+    - hydrogen
+brine:
+  components:
+    - water
+    - salt
+steam:
+  components:
+    - water
+    - fire
+ice:
+  components:
+    - water
+    - cold
+bubbles:
+  components:
+    - water
+    - air
+amalgam:
+  components:
+    - gold
+    - mercury
+metal:
+  components:
+    - earth
+    - electricity
+rock:
+  components:
+    - earth
+    - pressure
+lava:
+  components:
+    - earth
+    - fire
+glass:
+  components:
+    - sand
+    - fire
+rust:
+  components:
+    - oxygen
+    - iron
+salt:
+  components:
+    - sodium
+    - chlorine
+"hydrochloric acid":
+  components:
+    - hydrogen
+    - chlorine
+phosphine:
+  components:
+    - phosphorus
+    - hydrogen
+"phosphoric acid":
+  components:
+    - phosphorus
+    - oxygen
+ammonia:
+  components:
+    - nitrogen
+    - hydrogen
+methane:
+  components:
+    - carbon
+    - hydrogen
+limestone:
+  components:
+    - calcium
+    - carbon
+"carbon dioxide":
+  components:
+    - carbon
+    - oxygen
+"nitrous oxide":
+  components:
+    - nitrogen
+    - oxygen
+"explosion":
+  components:
+    - fire
+    - oxygen
+"calcium chloride":
+  components:
+    - calcium
+    - chlorine
+diamond:
+  components:
+    - carbon
+    - pressure
