@@ -22,21 +22,18 @@ func main() {
 
 	size := fyne.NewSize(80, 30)
 	entries := make([]fyne.CanvasObject, 0)
-	for col := float32(0); col < 4; col++ {
-		for row := float32(0); row < 5; row++ {
-			entryString := binding.NewString()
-			entryString.Set(fmt.Sprintf("Entry %d,%d", int(col+1), int(row+1)))
-			strings = append(strings, entryString)
-			entries = append(entries, MakeEntry(&entryString, size, fyne.NewPos((size.Width+2)*col, (size.Height+2)*row)))
+	rows := 5
+	cols := 4
+	for i := 0; i < cols*rows; i++ {
+		entryString := binding.NewString()
+		if (i % cols) == 0 {
+			entryString.Set(fmt.Sprintf("Entry %d", i/cols+1))
 		}
+		strings = append(strings, entryString)
+		entries = append(entries, MakeEntry(&entryString, size))
 	}
-	// pos := fyne.NewPos(0, (size.Height+2)*5)
-	button := widget.NewButton("update rows", func() {
-		fmt.Println("update rows")
-		for _, v := range strings {
-			v.Set("hi")
-		}
-	})
+
+	button := widget.NewButton("update rows", TestUpdate(strings, cols, rows))
 	button.Alignment = widget.ButtonAlignLeading
 	button.Importance = widget.HighImportance
 	button.Resize(size)
@@ -49,11 +46,24 @@ func main() {
 	myWindow.ShowAndRun()
 }
 
-func MakeEntry(text *binding.String, size fyne.Size, loc fyne.Position) fyne.CanvasObject {
+func TestUpdate(strings []binding.String, cols, rows int) func() {
+	return func() {
+		fmt.Println("update rows")
+		for i, v := range strings {
+			if (i % cols) == 0 {
+				v.Set("Col 1")
+			} else {
+				v.Set(".")
+			}
+		}
+	}
+}
+
+func MakeEntry(text *binding.String, size fyne.Size) fyne.CanvasObject {
 	entry := widget.NewEntryWithData(*text)
 	entry.Validator = nil
 	entry.Resize(size)
-	entry.Move(loc)
+	entry.OnChanged = func(text string) { fmt.Println(text) }
 	return fyne.CanvasObject(entry)
 }
 
