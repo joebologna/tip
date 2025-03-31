@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -18,16 +19,24 @@ func main() {
 	myWindow := myApp.NewWindow("Tip")
 	tileSize := float32(92)
 
+	strings := make([]binding.String, 0)
+
 	size := fyne.NewSize(80, 30)
 	entries := make([]fyne.CanvasObject, 0)
 	for col := float32(0); col < 4; col++ {
 		for row := float32(0); row < 5; row++ {
-			entries = append(entries, MakeEntry(fmt.Sprintf("Entry %d,%d", int(col+1), int(row+1)), size, fyne.NewPos((size.Width+2)*col, (size.Height+2)*row)))
+			entryString := binding.NewString()
+			entryString.Set(fmt.Sprintf("Entry %d,%d", int(col+1), int(row+1)))
+			strings = append(strings, entryString)
+			entries = append(entries, MakeEntry(&entryString, size, fyne.NewPos((size.Width+2)*col, (size.Height+2)*row)))
 		}
 	}
 	pos := fyne.NewPos(0, (size.Height+2)*5)
 	button := widget.NewButton("update rows", func() {
 		fmt.Println("update rows")
+		for _, v := range strings {
+			v.Set("hi")
+		}
 	})
 	button.Alignment = widget.ButtonAlignLeading
 	button.Importance = widget.HighImportance
@@ -44,9 +53,9 @@ func main() {
 	myWindow.ShowAndRun()
 }
 
-func MakeEntry(text string, size fyne.Size, loc fyne.Position) fyne.CanvasObject {
-	entry := widget.NewEntry()
-	entry.SetText(text)
+func MakeEntry(text *binding.String, size fyne.Size, loc fyne.Position) fyne.CanvasObject {
+	entry := widget.NewEntryWithData(*text)
+	entry.Validator = nil
 	entry.Resize(size)
 	entry.Move(loc)
 	return fyne.CanvasObject(entry)
