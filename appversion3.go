@@ -14,56 +14,49 @@ func App3() (*fyne.Container, *widget.Button) {
 	strings := make([]binding.String, 0)
 
 	selected := binding.NewString()
-	tips := MakeTips(selected)
-	summary := MakeSummary()
+	totalBill, totalTip, totalBillWithTip := binding.NewString(), binding.NewString(), binding.NewString()
+	summary := makeSummary(totalBill, totalTip, totalBillWithTip)
+	tips := makeTips(selected, totalBill, totalTip, totalBillWithTip, updateSummary)
 
 	// rows:=2
+	rows := 0
 	cols := 4
 
 	row := 0
-	grid1 := container.NewGridWithColumns(4)
-	for col := 0; col < cols; col++ {
-		grid1.Add(LabelCell(row, col))
-	}
-
 	row++
 	grid2 := container.NewGridWithColumns(4)
 	for col := 0; col < cols; col++ {
 		entryString := binding.NewString()
 		strings = append(strings, entryString)
-		grid2.Add(EntryCell(row, col, entryString))
+		grid2.Add(entryCell2(entryString))
 	}
+	updateCells(rows, cols, strings)
 
-	stuff := container.NewVBox(tips, summary, grid1, grid2)
+	stuff := container.NewVBox(tips, summary, grid2)
 	button := widget.NewButton("update grid2", func() {
-		for col, s := range strings {
-			s.Set(fmt.Sprintf("Cell: %d,%d", 2, col+1))
-		}
+		updateCells(rows, cols, strings)
 	})
 	return stuff, button
 }
 
-func MakeTips(selected binding.String) (tips *widget.RadioGroup) {
-	tips = widget.NewRadioGroup([]string{"10%", "15%", "20%", "25%"}, func(changed string) { selected.Set(changed) })
+func makeTips(selected, totalBill, totalTip, totalWithTip binding.String, updateSummary func(totalBill, totalTip, totalWithTip binding.String)) (tips *widget.RadioGroup) {
+	tips = widget.NewRadioGroup([]string{"10%", "15%", "20%", "25%"}, func(changed string) {
+		selected.Set(changed)
+		updateSummary(totalBill, totalTip, totalWithTip)
+	})
 	tips.SetSelected("20%")
 	tips.Horizontal = true
 	return tips
 }
 
-func MakeSummary() (summary fyne.CanvasObject) {
+func makeSummary(totalBill, totalTip, totalWithTip binding.String) (summary fyne.CanvasObject) {
 	totalBillLabel := widget.NewLabel("Total Bill:")
-	totalBill := binding.NewString()
-	totalBill.Set("0.00")
 	totalBillValue := widget.NewLabelWithData(totalBill)
 
 	totalTipLabel := widget.NewLabel("Total Tip:")
-	totalTip := binding.NewString()
-	totalTip.Set("0.00")
 	totalTipValue := widget.NewLabelWithData(totalTip)
 
 	totalWithTipLabel := widget.NewLabel("Total with Tip:")
-	totalWithTip := binding.NewString()
-	totalWithTip.Set("0.00")
 	totalWithTipValue := widget.NewLabelWithData(totalWithTip)
 
 	splitEvenlyLabel := widget.NewCheck("Split Evenly:", func(onOff bool) { fmt.Println(onOff) })
@@ -74,4 +67,28 @@ func MakeSummary() (summary fyne.CanvasObject) {
 		splitEvenlyLabel,
 	)
 	return summary
+}
+
+func entryCell2(text binding.String) fyne.CanvasObject {
+	e := widget.NewEntryWithData(text)
+	e.Validator = nil
+	return e
+}
+
+func updateCells(rows, cols int, strings []binding.String) {
+	// for row := 0; row < rows; row++ {
+	for col := 0; col < cols; col++ {
+		if col == 0 {
+			strings[col].Set(fmt.Sprintf("Payee %d", col+1))
+		} else {
+			strings[col].Set("")
+		}
+	}
+	// }
+}
+
+func updateSummary(totalBill, totalTip, totalWithTip binding.String) {
+	totalBill.Set("Update Bill")
+	totalTip.Set("Update Tip")
+	totalWithTip.Set("Update Bill with Tip")
 }
