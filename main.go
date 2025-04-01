@@ -16,6 +16,16 @@ func main() {
 	myApp.Settings().SetTheme(&CustomTheme{theme.DefaultTheme()})
 	myWindow := myApp.NewWindow("Tip")
 
+	stuff, button := makeStuff()
+
+	myWindow.SetContent(container.NewBorder(stuff, button, nil, nil))
+
+	screenSize := GetScreenSize()
+	myWindow.Resize(screenSize)
+	myWindow.ShowAndRun()
+}
+
+func makeStuff() (stuff *fyne.Container, button *widget.Button) {
 	strings := make([]binding.String, 0)
 
 	entrySize := fyne.NewSize(80, 30)
@@ -31,22 +41,18 @@ func main() {
 		entries = append(entries, MakeEntry(&entryString, entrySize))
 	}
 
-	button := widget.NewButton("update rows", TestUpdate(strings, cols, rows))
+	button = widget.NewButton("update rows", TestUpdate(strings, cols, rows))
 	button.Alignment = widget.ButtonAlignLeading
 	button.Importance = widget.HighImportance
 	button.Resize(entrySize)
 
-	stuff := container.NewVBox()
+	stuff = container.NewVBox()
 	grid := container.NewAdaptiveGrid(cols, entries...)
 	stuff.Add(grid)
 
 	stuff.Add(widget.NewLabel(O(fyne.CurrentDevice().Orientation()).String()))
 
-	myWindow.SetContent(container.NewBorder(stuff, button, nil, nil))
-
-	screenSize := GetScreenSize()
-	myWindow.Resize(screenSize)
-	myWindow.ShowAndRun()
+	return stuff, button
 }
 
 func TestUpdate(strings []binding.String, cols, rows int) func() {
