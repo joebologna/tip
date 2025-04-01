@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
+)
+
 type AppVersion int
 
 const (
@@ -15,5 +20,14 @@ func (app AppVersion) String() string {
 		return "V2"
 	default:
 		return "Unknown"
+	}
+}
+
+func (v AppVersion) makeStuff() (stuff *fyne.Container, button *widget.Button) {
+	switch v {
+	case AppVersion1:
+		return App1()
+	default:
+		panic("unsupported version")
 	}
 }

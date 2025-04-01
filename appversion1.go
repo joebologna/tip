@@ -39,3 +39,24 @@ func App1() (*fyne.Container, *widget.Button) {
 
 	return stuff, button
 }
+
+func MakeEntry(text *binding.String, size fyne.Size) fyne.CanvasObject {
+	entry := widget.NewEntryWithData(*text)
+	entry.Validator = nil
+	entry.Resize(size)
+	entry.OnChanged = func(text string) { fmt.Println(text) }
+	return fyne.CanvasObject(entry)
+}
+
+func TestUpdate(strings []binding.String, cols, rows int) func() {
+	return func() {
+		fmt.Println("update rows")
+		for i, v := range strings {
+			if (i % cols) == 0 {
+				v.Set("Col 1")
+			} else {
+				v.Set(".")
+			}
+		}
+	}
+}
