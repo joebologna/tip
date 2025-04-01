@@ -23,10 +23,12 @@ func (app AppVersion) String() string {
 	}
 }
 
-func (v AppVersion) makeStuff() (stuff *fyne.Container, button *widget.Button) {
+func (v AppVersion) app() (stuff *fyne.Container, button *widget.Button) {
 	switch v {
 	case AppVersion1:
 		return App1()
+	case AppVersion2:
+		return App2()
 	default:
 		panic("unsupported version")
 	}
