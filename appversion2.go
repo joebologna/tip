@@ -32,8 +32,8 @@ func App2() (*fyne.Container, *widget.Button) {
 
 	stuff := container.NewVBox(grid1, grid2)
 	button := widget.NewButton("update grid2", func() {
-		for _, s := range strings {
-			s.Set("this")
+		for col, s := range strings {
+			s.Set(fmt.Sprintf("Cell: %d,%d", 2, col+1))
 		}
 	})
 	return stuff, button

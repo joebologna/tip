@@ -10,6 +10,7 @@ type AppVersion int
 const (
 	AppVersion1 AppVersion = iota
 	AppVersion2
+	AppVersion3
 )
 
 func (app AppVersion) String() string {
@@ -29,6 +30,8 @@ func (v AppVersion) app() (stuff *fyne.Container, button *widget.Button) {
 		return App1()
 	case AppVersion2:
 		return App2()
+	case AppVersion3:
+		return App3()
 	default:
 		panic("unsupported version")
 	}
