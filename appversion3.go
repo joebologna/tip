@@ -91,7 +91,7 @@ func entryCell2(text binding.String, onChanged func(string)) fyne.CanvasObject {
 	return e
 }
 
-func reset(rows, cols int, strings []binding.String, totalBill, totalTip, totalWithTip binding.String) {
+func reset(_, cols int, strings []binding.String, totalBill, totalTip, totalWithTip binding.String) {
 	// for row := 0; row < rows; row++ {
 	for col := 0; col < cols; col++ {
 		if col == 0 {
