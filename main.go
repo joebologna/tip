@@ -16,7 +16,7 @@ func main() {
 	myApp.Settings().SetTheme(&CustomTheme{theme.DefaultTheme()})
 	myWindow := myApp.NewWindow("Tip")
 
-	stuff, button := makeStuff()
+	stuff, button := AppVersion1.makeStuff()
 
 	myWindow.SetContent(container.NewBorder(stuff, button, nil, nil))
 
@@ -25,34 +25,13 @@ func main() {
 	myWindow.ShowAndRun()
 }
 
-func makeStuff() (stuff *fyne.Container, button *widget.Button) {
-	strings := make([]binding.String, 0)
-
-	entrySize := fyne.NewSize(80, 30)
-	entries := make([]fyne.CanvasObject, 0)
-	rows := 5
-	cols := 4
-	for i := 0; i < cols*rows; i++ {
-		entryString := binding.NewString()
-		if (i % cols) == 0 {
-			entryString.Set(fmt.Sprintf("Entry %d", i/cols+1))
-		}
-		strings = append(strings, entryString)
-		entries = append(entries, MakeEntry(&entryString, entrySize))
+func (v AppVersion) makeStuff() (stuff *fyne.Container, button *widget.Button) {
+	switch v {
+	case AppVersion1:
+		return App1()
+	default:
+		panic("unsupported version")
 	}
-
-	button = widget.NewButton("update rows", TestUpdate(strings, cols, rows))
-	button.Alignment = widget.ButtonAlignLeading
-	button.Importance = widget.HighImportance
-	button.Resize(entrySize)
-
-	stuff = container.NewVBox()
-	grid := container.NewAdaptiveGrid(cols, entries...)
-	stuff.Add(grid)
-
-	stuff.Add(widget.NewLabel(O(fyne.CurrentDevice().Orientation()).String()))
-
-	return stuff, button
 }
 
 func TestUpdate(strings []binding.String, cols, rows int) func() {
