@@ -33,6 +33,7 @@ func newEntryCell2WithData(text binding.String, id int, sum, tip, sumWithTip bin
 func (e *entryCell2) FocusLost() {
 	fmt.Println(e.id, "Focus Lost")
 	e.calculate(e, *e.boundStrings, e.tips)
+	e.Entry.FocusLost()
 }
 
 // Stub to generate a grid with entries and a button which updates them, resolving issues with AdaptiveGrid
