@@ -17,11 +17,13 @@ type entryCell2 struct {
 	widget.Entry
 	id                   int
 	sum, tip, sumWithTip binding.String
-	calculate            func(*entryCell2)
+	boundStrings         *[]binding.String
+	tips                 *widget.RadioGroup
+	calculate            func(e *entryCell2, boundStrings []binding.String, tips *widget.RadioGroup)
 }
 
-func newEntryCell2WithData(text binding.String, id int, sum, tip, sumWithTip binding.String, calculate func(*entryCell2)) *entryCell2 {
-	e := &entryCell2{id: id, sum: sum, tip: tip, sumWithTip: sumWithTip, calculate: calculate}
+func newEntryCell2WithData(text binding.String, id int, sum, tip, sumWithTip binding.String, boundStrings *[]binding.String, tips *widget.RadioGroup, calculate func(e *entryCell2, boundStrings []binding.String, tips *widget.RadioGroup)) *entryCell2 {
+	e := &entryCell2{id: id, sum: sum, tip: tip, sumWithTip: sumWithTip, calculate: calculate, boundStrings: boundStrings, tips: tips}
 	e.Bind(text)
 	e.Validator = nil
 	e.ExtendBaseWidget(e)
@@ -30,7 +32,7 @@ func newEntryCell2WithData(text binding.String, id int, sum, tip, sumWithTip bin
 
 func (e *entryCell2) FocusLost() {
 	fmt.Println(e.id, "Focus Lost")
-	e.calculate(e)
+	e.calculate(e, *e.boundStrings, e.tips)
 }
 
 // Stub to generate a grid with entries and a button which updates them, resolving issues with AdaptiveGrid
@@ -43,52 +45,6 @@ func App3() (*fyne.Container, *widget.Button) {
 	summary := makeSummary(totalBill, totalTip, totalBillWithTip)
 	tips := makeTips(selected, totalBill, totalTip, totalBillWithTip, updateSummary)
 
-	calc1 := func(e *entryCell2) {
-		t, _ := boundStrings[1].Get()
-		sum := "(" + t
-		t, _ = boundStrings[2].Get()
-		sum = sum + "+" + t
-		t, _ = boundStrings[3].Get()
-		sum = sum + "+" + t + ")"
-		e.sum.Set(sum)
-		e.tip.Set(sum + "*" + tips.Selected)
-		e.sumWithTip.Set(sum + "*(1+" + tips.Selected + ")")
-	}
-	getS := func(sum binding.String) string { t, _ := sum.Get(); return t }
-	eval := func(e string) float32 {
-		evale, err := govaluate.NewEvaluableExpression(e)
-		if err != nil {
-			return 0.0
-		}
-		result, err := evale.Evaluate(nil)
-		if err != nil {
-			return 0.0
-		}
-		// Handle different possible types of the result
-		switch v := result.(type) {
-		case float64:
-			return float32(v)
-		case int:
-			return float32(v)
-		default:
-			fmt.Println("Unexpected result type:", v)
-			return 0.0
-		}
-	}
-	calc1 = func(e *entryCell2) {
-		sums := make([]string, 0)
-		for i := 1; i <= 3; i++ {
-			t := getS(boundStrings[i])
-			if t != "" {
-				sums = append(sums, t)
-			}
-		}
-		sum := fmt.Sprintf("(%s)", strings.Join(sums, "+"))
-		e.sum.Set(fmt.Sprintf("%.2f", eval(sum)))
-		e.tip.Set(fmt.Sprintf("%.2f", eval(fmt.Sprintf("%s * %s", sum, tips.Selected))))
-		e.sumWithTip.Set(fmt.Sprintf("%.2f", eval(fmt.Sprintf("%s * (1+%s)", sum, tips.Selected))))
-	}
-
 	// rows:=2
 	rows := 0
 	cols := 4
@@ -99,7 +55,7 @@ func App3() (*fyne.Container, *widget.Button) {
 	for col := 0; col < cols; col++ {
 		entryString := binding.NewString()
 		boundStrings = append(boundStrings, entryString)
-		e := newEntryCell2WithData(entryString, col, totalBill, totalTip, totalBillWithTip, calc1)
+		e := newEntryCell2WithData(entryString, col, totalBill, totalTip, totalBillWithTip, &boundStrings, tips, calc1)
 		entries = append(entries, e)
 		grid2.Add(e)
 	}
@@ -173,4 +129,41 @@ func updateSummary(totalBill binding.String, totalBillValue string, totalTip bin
 	totalBill.Set(totalBillValue)
 	totalTip.Set(totalTipValue)
 	totalWithTip.Set(totalWithTipValue)
+}
+
+func eval(e string) float32 {
+	evale, err := govaluate.NewEvaluableExpression(e)
+	if err != nil {
+		return 0.0
+	}
+	result, err := evale.Evaluate(nil)
+	if err != nil {
+		return 0.0
+	}
+	// Handle different possible types of the result
+	switch v := result.(type) {
+	case float64:
+		return float32(v)
+	case int:
+		return float32(v)
+	default:
+		fmt.Println("Unexpected result type:", v)
+		return 0.0
+	}
+}
+
+func getS(s binding.String) string { t, _ := s.Get(); return t }
+
+func calc1(e *entryCell2, boundStrings []binding.String, tips *widget.RadioGroup) {
+	sums := make([]string, 0)
+	for i := 1; i < len(boundStrings); i++ {
+		t := getS(boundStrings[i])
+		if t != "" {
+			sums = append(sums, t)
+		}
+	}
+	sum := fmt.Sprintf("(%s)", strings.Join(sums, "+"))
+	e.sum.Set(fmt.Sprintf("%.2f", eval(sum)))
+	e.tip.Set(fmt.Sprintf("%.2f", eval(fmt.Sprintf("%s * %s", sum, tips.Selected))))
+	e.sumWithTip.Set(fmt.Sprintf("%.2f", eval(fmt.Sprintf("%s * (1+%s)", sum, tips.Selected))))
 }
