@@ -2,7 +2,10 @@ module tip
 
 go 1.23
 
-require fyne.io/fyne/v2 v2.5.4
+require (
+	fyne.io/fyne/v2 v2.5.4
+	github.com/Knetic/govaluate v3.0.0+incompatible
+)
 
 require (
 	fyne.io/systray v1.11.0 // indirect

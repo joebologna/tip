@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/Knetic/govaluate"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -32,13 +35,59 @@ func (e *entryCell2) FocusLost() {
 
 // Stub to generate a grid with entries and a button which updates them, resolving issues with AdaptiveGrid
 func App3() (*fyne.Container, *widget.Button) {
-	strings := make([]binding.String, 0)
+	boundStrings := make([]binding.String, 0)
 	entries := make([]*entryCell2, 0)
 
 	selected := binding.NewString()
 	totalBill, totalTip, totalBillWithTip := binding.NewString(), binding.NewString(), binding.NewString()
 	summary := makeSummary(totalBill, totalTip, totalBillWithTip)
 	tips := makeTips(selected, totalBill, totalTip, totalBillWithTip, updateSummary)
+
+	calc1 := func(e *entryCell2) {
+		t, _ := boundStrings[1].Get()
+		sum := "(" + t
+		t, _ = boundStrings[2].Get()
+		sum = sum + "+" + t
+		t, _ = boundStrings[3].Get()
+		sum = sum + "+" + t + ")"
+		e.sum.Set(sum)
+		e.tip.Set(sum + "*" + tips.Selected)
+		e.sumWithTip.Set(sum + "*(1+" + tips.Selected + ")")
+	}
+	getS := func(sum binding.String) string { t, _ := sum.Get(); return t }
+	eval := func(e string) float32 {
+		evale, err := govaluate.NewEvaluableExpression(e)
+		if err != nil {
+			return 0.0
+		}
+		result, err := evale.Evaluate(nil)
+		if err != nil {
+			return 0.0
+		}
+		// Handle different possible types of the result
+		switch v := result.(type) {
+		case float64:
+			return float32(v)
+		case int:
+			return float32(v)
+		default:
+			fmt.Println("Unexpected result type:", v)
+			return 0.0
+		}
+	}
+	calc1 = func(e *entryCell2) {
+		sums := make([]string, 0)
+		for i := 1; i <= 3; i++ {
+			t := getS(boundStrings[i])
+			if t != "" {
+				sums = append(sums, t)
+			}
+		}
+		sum := fmt.Sprintf("(%s)", strings.Join(sums, "+"))
+		e.sum.Set(fmt.Sprintf("%.2f", eval(sum)))
+		e.tip.Set(fmt.Sprintf("%.2f", eval(fmt.Sprintf("%s * %s", sum, tips.Selected))))
+		e.sumWithTip.Set(fmt.Sprintf("%.2f", eval(fmt.Sprintf("%s * (1+%s)", sum, tips.Selected))))
+	}
 
 	// rows:=2
 	rows := 0
@@ -49,36 +98,26 @@ func App3() (*fyne.Container, *widget.Button) {
 	grid2 := container.NewGridWithColumns(4)
 	for col := 0; col < cols; col++ {
 		entryString := binding.NewString()
-		strings = append(strings, entryString)
-		e := newEntryCell2WithData(entryString, col, totalBill, totalTip, totalBillWithTip, func(e *entryCell2) {
-			t, _ := strings[1].Get()
-			sum := "(" + t
-			t, _ = strings[2].Get()
-			sum = sum + "+" + t
-			t, _ = strings[3].Get()
-			sum = sum + "+" + t + ")"
-			e.sum.Set(sum)
-			e.tip.Set(sum + "*" + tips.Selected)
-			e.sumWithTip.Set(sum + "*(1+" + tips.Selected + ")")
-		})
+		boundStrings = append(boundStrings, entryString)
+		e := newEntryCell2WithData(entryString, col, totalBill, totalTip, totalBillWithTip, calc1)
 		entries = append(entries, e)
 		grid2.Add(e)
 	}
-	reset(rows, cols, strings, totalBill, totalTip, totalBillWithTip, entries)
+	reset(rows, cols, boundStrings, totalBill, totalTip, totalBillWithTip, entries)
 
 	stuff := container.NewVBox(tips, summary, grid2)
 	button := widget.NewButton("Reset", func() {
-		reset(rows, cols, strings, totalBill, totalTip, totalBillWithTip, entries)
+		reset(rows, cols, boundStrings, totalBill, totalTip, totalBillWithTip, entries)
 	})
 	return stuff, button
 }
 
 func makeTips(selected, totalBill, totalTip, totalWithTip binding.String, updateSummary func(totalBill binding.String, totalBillValue string, totalTip binding.String, totalTipValue string, totalWithTip binding.String, totalWithTipValue string)) (tips *widget.RadioGroup) {
-	tips = widget.NewRadioGroup([]string{"10%", "15%", "20%", "25%"}, func(changed string) {
+	tips = widget.NewRadioGroup([]string{"0.1", "0.15", "0.2", "0.25"}, func(changed string) {
 		selected.Set(changed)
 		updateSummary(totalBill, "0.00", totalTip, "0.00", totalWithTip, "0.00")
 	})
-	tips.SetSelected("20%")
+	tips.SetSelected("0.2")
 	tips.Horizontal = true
 	return tips
 }
