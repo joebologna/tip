@@ -2,7 +2,6 @@ package main
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/widget"
 )
 
 type AppVersion int
@@ -29,7 +28,7 @@ func (app AppVersion) String() string {
 	}
 }
 
-func (v AppVersion) app() (stuff *fyne.Container, button *widget.Button) {
+func (v AppVersion) app() (stuff *fyne.Container, button fyne.CanvasObject) {
 	switch v {
 	case AppVersion1:
 		return App1()

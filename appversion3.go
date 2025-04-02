@@ -37,7 +37,7 @@ func (e *entryCell2) FocusLost() {
 }
 
 // Stub to generate a grid with entries and a button which updates them, resolving issues with AdaptiveGrid
-func App3() (*fyne.Container, *widget.Button) {
+func App3() (*fyne.Container, fyne.CanvasObject) {
 	boundStrings := make([]binding.String, 0)
 	entries := make([]*entryCell2, 0)
 
@@ -66,7 +66,7 @@ func App3() (*fyne.Container, *widget.Button) {
 	button := widget.NewButton("Reset", func() {
 		reset(rows, cols, boundStrings, totalBill, totalTip, totalBillWithTip, entries)
 	})
-	return stuff, button
+	return stuff, container.NewGridWithColumns(2, widget.NewButton("Calculate Tip", func() {}), button)
 }
 
 func makeTips(selected, totalBill, totalTip, totalWithTip binding.String, updateSummary func(totalBill binding.String, totalBillValue string, totalTip binding.String, totalTipValue string, totalWithTip binding.String, totalWithTipValue string)) (tips *widget.RadioGroup) {
