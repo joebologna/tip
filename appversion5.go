@@ -8,34 +8,30 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
 
-type BString struct{ binding.String }
-
-func NewBString() BString { return BString{binding.NewString()} }
-
-type TipSelector struct {
+type TipPercentSelector struct {
 	*widget.RadioGroup
 	tipLabels       []string
 	tipLabelDefault string
 	tipFactors      []float32
 	curTipFactor    float32
-	calculate       func(ts *TipSelector)
+	calculate       func(ts *TipPercentSelector)
+	totalEntry      *TotalEntry
 }
 
-func (ts *TipSelector) Calculate() {
+func (ts *TipPercentSelector) Calculate() {
 	ts.calculate(ts)
 }
 
-func NewTipSelector(calculate func(ts *TipSelector)) *TipSelector {
+func NewTipSelector(te *TotalEntry, calculate func(ts *TipPercentSelector)) *TipPercentSelector {
 	tipLabels := make([]string, 0)
 	for tip := 10; tip <= 25; tip += 5 {
 		tipLabels = append(tipLabels, fmt.Sprintf("%d%%", tip))
 	}
-	ts := &TipSelector{tipLabels: tipLabels, tipLabelDefault: "20%", tipFactors: make([]float32, 0), calculate: calculate}
+	ts := &TipPercentSelector{tipLabels: tipLabels, tipLabelDefault: "20%", tipFactors: make([]float32, 0), calculate: calculate}
 	for _, v := range tipLabels {
 		ts.tipFactors = append(ts.tipFactors, TipLabelToFactor(v))
 	}
@@ -46,7 +42,60 @@ func NewTipSelector(calculate func(ts *TipSelector)) *TipSelector {
 	})
 	ts.RadioGroup.Horizontal = true
 	ts.RadioGroup.SetSelected(ts.tipLabelDefault)
+	ts.totalEntry = te
 	return ts
+}
+
+type TotalEntry struct {
+	widget.Entry
+	text    BS
+	total   func() float32
+	summary *Summary
+	ts      *TipPercentSelector
+}
+
+func NewTotalEntryWithData(text BS, summary *Summary, ts *TipPercentSelector) *TotalEntry {
+	var e *TotalEntry
+	e = &TotalEntry{text: text, summary: summary, ts: ts, total: func() float32 {
+		return ParseFloat32(e.text.get())
+	}}
+	e.Bind(text)
+	e.text = text
+	e.Validator = nil
+	e.ExtendBaseWidget(e)
+	return e
+}
+
+func (e *TotalEntry) FocusLost() {
+	newTotal := ParseFloat32(e.text.get())
+	e.summary.Calculate(newTotal, e.ts)
+	// this is needed to trigger the hide the cursor and remove highlight
+	e.Entry.FocusLost()
+}
+
+type Summary struct {
+	totalLabel, tipLabel, totalWithTipLabel *widget.Label
+	summary                                 fyne.CanvasObject
+	total, tip, totalWithTip                float32
+}
+
+func NewSummary() *Summary {
+	s := &Summary{totalLabel: widget.NewLabel(""), tipLabel: widget.NewLabel(""), totalWithTipLabel: widget.NewLabel("")}
+	s.summary = container.NewVBox(
+		container.NewGridWithColumns(2, widget.NewLabel("Total:"), s.totalLabel),
+		container.NewGridWithColumns(2, widget.NewLabel("Tip:"), s.tipLabel),
+		container.NewGridWithColumns(2, widget.NewLabel("Total with Tip:"), s.totalWithTipLabel),
+	)
+	return s
+}
+
+func (s *Summary) Calculate(newTotal float32, ts *TipPercentSelector) {
+	s.total = newTotal
+	s.tip = newTotal * ts.curTipFactor
+	s.totalWithTip = newTotal * (1 + ts.curTipFactor)
+	s.totalLabel.SetText(fmt.Sprintf("%.2f", s.total))
+	s.tipLabel.SetText(fmt.Sprintf("%.2f", s.tip))
+	s.totalWithTipLabel.SetText(fmt.Sprintf("%.2f", s.totalWithTip))
 }
 
 func ParseFloat32(s string) float32 {
@@ -60,10 +109,20 @@ func ParseFloat32(s string) float32 {
 func TipLabelToFactor(s string) float32 { return ParseFloat32(strings.ReplaceAll(s, "%", "")) / 100.0 }
 
 func App5() (*fyne.Container, fyne.CanvasObject) {
-	// render tip radio group
-	tipSelector := NewTipSelector(func(ts *TipSelector) { fmt.Println(ts) })
+	var summary *Summary = NewSummary()
+	var tipSelector *TipPercentSelector
+	var te *TotalEntry = NewTotalEntryWithData(NewBS(), summary, tipSelector)
+	tipSelector = NewTipSelector(te, func(ts *TipPercentSelector) {
+		fmt.Println(ts)
+		newTotal := ParseFloat32(te.text.get())
+		summary.Calculate(newTotal, ts)
+	})
 	return container.NewBorder(
-		tipSelector.RadioGroup,
+		container.NewVBox(
+			tipSelector.RadioGroup,
+			te,
+			summary.summary,
+		),
 		nil,
 		nil,
 		nil,
