@@ -10,9 +10,30 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+type entryCell2 struct {
+	widget.Entry
+	id                   int
+	sum, tip, sumWithTip binding.String
+	calculate            func(*entryCell2)
+}
+
+func newEntryCell2WithData(text binding.String, id int, sum, tip, sumWithTip binding.String, calculate func(*entryCell2)) *entryCell2 {
+	e := &entryCell2{id: id, sum: sum, tip: tip, sumWithTip: sumWithTip, calculate: calculate}
+	e.Bind(text)
+	e.Validator = nil
+	e.ExtendBaseWidget(e)
+	return e
+}
+
+func (e *entryCell2) FocusLost() {
+	fmt.Println(e.id, "Focus Lost")
+	e.calculate(e)
+}
+
 // Stub to generate a grid with entries and a button which updates them, resolving issues with AdaptiveGrid
 func App3() (*fyne.Container, *widget.Button) {
 	strings := make([]binding.String, 0)
+	entries := make([]*entryCell2, 0)
 
 	selected := binding.NewString()
 	totalBill, totalTip, totalBillWithTip := binding.NewString(), binding.NewString(), binding.NewString()
@@ -29,13 +50,25 @@ func App3() (*fyne.Container, *widget.Button) {
 	for col := 0; col < cols; col++ {
 		entryString := binding.NewString()
 		strings = append(strings, entryString)
-		grid2.Add(entryCell2(entryString, func(value string) { fmt.Println(col, value) }))
+		e := newEntryCell2WithData(entryString, col, totalBill, totalTip, totalBillWithTip, func(e *entryCell2) {
+			t, _ := strings[1].Get()
+			sum := "(" + t
+			t, _ = strings[2].Get()
+			sum = sum + "+" + t
+			t, _ = strings[3].Get()
+			sum = sum + "+" + t + ")"
+			e.sum.Set(sum)
+			e.tip.Set(sum + "*" + tips.Selected)
+			e.sumWithTip.Set(sum + "*(1+" + tips.Selected + ")")
+		})
+		entries = append(entries, e)
+		grid2.Add(e)
 	}
-	reset(rows, cols, strings, totalBill, totalTip, totalBillWithTip)
+	reset(rows, cols, strings, totalBill, totalTip, totalBillWithTip, entries)
 
 	stuff := container.NewVBox(tips, summary, grid2)
 	button := widget.NewButton("Reset", func() {
-		reset(rows, cols, strings, totalBill, totalTip, totalBillWithTip)
+		reset(rows, cols, strings, totalBill, totalTip, totalBillWithTip, entries)
 	})
 	return stuff, button
 }
@@ -84,14 +117,7 @@ func makeSummary(totalBill, totalTip, totalWithTip binding.String) (summary fyne
 	return summary
 }
 
-func entryCell2(text binding.String, onChanged func(string)) fyne.CanvasObject {
-	e := widget.NewEntryWithData(text)
-	e.Validator = nil
-	e.OnChanged = onChanged
-	return e
-}
-
-func reset(_, cols int, strings []binding.String, totalBill, totalTip, totalWithTip binding.String) {
+func reset(_, cols int, strings []binding.String, totalBill, totalTip, totalWithTip binding.String, _ []*entryCell2) {
 	// for row := 0; row < rows; row++ {
 	for col := 0; col < cols; col++ {
 		if col == 0 {
