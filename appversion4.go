@@ -26,6 +26,8 @@ func newCustomEntryWithData(text binding.String, id string, sum *widget.Label) *
 func (e *customEntry) FocusLost() {
 	fmt.Println(e.id + " Focus Lost")
 	e.sum.SetText(add(e, 1))
+	// this is needed to trigger the hide the cursor and remove highlight
+	e.Entry.FocusLost()
 }
 
 func add(e *customEntry, delta int) string {

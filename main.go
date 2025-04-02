@@ -11,7 +11,7 @@ func main() {
 	myApp.Settings().SetTheme(&CustomTheme{theme.DefaultTheme()})
 	myWindow := myApp.NewWindow("Tip")
 
-	stuff, button := AppVersion3.app()
+	stuff, button := AppVersion5.app()
 
 	myWindow.SetContent(container.NewBorder(stuff, button, nil, nil))
 

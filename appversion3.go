@@ -31,6 +31,7 @@ func newEntryCell2WithData(text binding.String, id int, sum, tip, sumWithTip BS,
 func (e *entryCell2) FocusLost() {
 	fmt.Println(e.id, "Focus Lost")
 	e.calculate(e, *e.boundStrings, e.tips)
+	// this is needed to trigger the hide the cursor and remove highlight
 	e.Entry.FocusLost()
 }
 

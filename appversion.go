@@ -11,6 +11,7 @@ const (
 	AppVersion2
 	AppVersion3
 	AppVersion4
+	AppVersion5
 )
 
 func (app AppVersion) String() string {
@@ -23,6 +24,8 @@ func (app AppVersion) String() string {
 		return "V3"
 	case AppVersion4:
 		return "V4"
+	case AppVersion5:
+		return "V5"
 	default:
 		return "Unknown"
 	}
@@ -38,6 +41,8 @@ func (v AppVersion) app() (stuff *fyne.Container, button fyne.CanvasObject) {
 		return App3()
 	case AppVersion4:
 		return App4()
+	case AppVersion5:
+		return App5()
 	default:
 		panic("unsupported version")
 	}
