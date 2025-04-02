@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Knetic/govaluate"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
@@ -16,13 +14,13 @@ import (
 type entryCell2 struct {
 	widget.Entry
 	id                   int
-	sum, tip, sumWithTip binding.String
-	boundStrings         *[]binding.String
+	sum, tip, sumWithTip BS
+	boundStrings         *[]BS
 	tips                 *widget.RadioGroup
-	calculate            func(e *entryCell2, boundStrings []binding.String, tips *widget.RadioGroup)
+	calculate            func(e *entryCell2, boundStrings []BS, tips *widget.RadioGroup)
 }
 
-func newEntryCell2WithData(text binding.String, id int, sum, tip, sumWithTip binding.String, boundStrings *[]binding.String, tips *widget.RadioGroup, calculate func(e *entryCell2, boundStrings []binding.String, tips *widget.RadioGroup)) *entryCell2 {
+func newEntryCell2WithData(text binding.String, id int, sum, tip, sumWithTip BS, boundStrings *[]BS, tips *widget.RadioGroup, calculate func(e *entryCell2, boundStrings []BS, tips *widget.RadioGroup)) *entryCell2 {
 	e := &entryCell2{id: id, sum: sum, tip: tip, sumWithTip: sumWithTip, calculate: calculate, boundStrings: boundStrings, tips: tips}
 	e.Bind(text)
 	e.Validator = nil
@@ -38,11 +36,11 @@ func (e *entryCell2) FocusLost() {
 
 // Stub to generate a grid with entries and a button which updates them, resolving issues with AdaptiveGrid
 func App3() (*fyne.Container, fyne.CanvasObject) {
-	boundStrings := make([]binding.String, 0)
+	boundStrings := make([]BS, 0)
 	entries := make([]*entryCell2, 0)
 
 	selected := binding.NewString()
-	totalBill, totalTip, totalBillWithTip := binding.NewString(), binding.NewString(), binding.NewString()
+	totalBill, totalTip, totalBillWithTip := NewBS(), NewBS(), NewBS()
 	summary := makeSummary(totalBill, totalTip, totalBillWithTip)
 	tips := makeTips(selected, totalBill, totalTip, totalBillWithTip, updateSummary)
 
@@ -54,7 +52,7 @@ func App3() (*fyne.Container, fyne.CanvasObject) {
 	row++
 	grid2 := container.NewGridWithColumns(4)
 	for col := 0; col < cols; col++ {
-		entryString := binding.NewString()
+		entryString := NewBS()
 		boundStrings = append(boundStrings, entryString)
 		e := newEntryCell2WithData(entryString, col, totalBill, totalTip, totalBillWithTip, &boundStrings, tips, calc1)
 		entries = append(entries, e)
@@ -113,7 +111,7 @@ func makeSummary(totalBill, totalTip, totalWithTip binding.String) (summary fyne
 	return summary
 }
 
-func reset(_, cols int, strings []binding.String, totalBill, totalTip, totalWithTip binding.String, _ []*entryCell2) {
+func reset(_, cols int, strings []BS, totalBill, totalTip, totalWithTip binding.String, _ []*entryCell2) {
 	// for row := 0; row < rows; row++ {
 	for col := 0; col < cols; col++ {
 		if col == 0 {
@@ -132,39 +130,16 @@ func updateSummary(totalBill binding.String, totalBillValue string, totalTip bin
 	totalWithTip.Set(totalWithTipValue)
 }
 
-func eval(e string) float32 {
-	evale, err := govaluate.NewEvaluableExpression(e)
-	if err != nil {
-		return 0.0
-	}
-	result, err := evale.Evaluate(nil)
-	if err != nil {
-		return 0.0
-	}
-	// Handle different possible types of the result
-	switch v := result.(type) {
-	case float64:
-		return float32(v)
-	case int:
-		return float32(v)
-	default:
-		fmt.Println("Unexpected result type:", v)
-		return 0.0
-	}
-}
-
-func getS(s binding.String) string { t, _ := s.Get(); return t }
-
-func calc1(e *entryCell2, boundStrings []binding.String, tips *widget.RadioGroup) {
+func calc1(e *entryCell2, boundStrings []BS, tips *widget.RadioGroup) {
 	sums := make([]string, 0)
 	for i := 1; i < len(boundStrings); i++ {
-		t := getS(boundStrings[i])
+		t := boundStrings[i].get()
 		if t != "" {
 			sums = append(sums, t)
 		}
 	}
 	sum := fmt.Sprintf("(%s)", strings.Join(sums, "+"))
-	e.sum.Set(fmt.Sprintf("%.2f", eval(sum)))
-	e.tip.Set(fmt.Sprintf("%.2f", eval(fmt.Sprintf("%s * %s", sum, tips.Selected))))
-	e.sumWithTip.Set(fmt.Sprintf("%.2f", eval(fmt.Sprintf("%s * (1+%s)", sum, tips.Selected))))
+	e.sum.Set(fmt.Sprintf("%.2f", evalFloat(sum)))
+	e.tip.Set(fmt.Sprintf("%.2f", evalFloat(fmt.Sprintf("%s * %s", sum, tips.Selected))))
+	e.sumWithTip.Set(fmt.Sprintf("%.2f", evalFloat(fmt.Sprintf("%s * (1+%s)", sum, tips.Selected))))
 }

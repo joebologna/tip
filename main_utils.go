@@ -1,7 +1,11 @@
 package main
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/data/binding"
+	"github.com/Knetic/govaluate"
 )
 
 func GetDeviceType() (is_mobile, is_browser, is_desktop bool) {
@@ -42,3 +46,30 @@ func (o O) String() string {
 	}
 	return ""
 }
+
+func evalFloat(e string) float32 {
+	ee, err := govaluate.NewEvaluableExpression(e)
+	if err != nil {
+		return 0.0
+	}
+	result, err := ee.Evaluate(nil)
+	if err != nil {
+		return 0.0
+	}
+	// Handle different possible types of the result
+	switch v := result.(type) {
+	case float64:
+		return float32(v)
+	case int:
+		return float32(v)
+	default:
+		fmt.Println("Unexpected result type:", v)
+		return 0.0
+	}
+}
+
+type BS struct{ binding.String }
+
+func NewBS() BS { return BS{binding.NewString()} }
+
+func (s BS) get() string { t, _ := s.Get(); return t }
