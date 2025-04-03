@@ -16,7 +16,7 @@ func main() {
 	myApp.Settings().SetTheme(&CustomTheme{theme.DefaultTheme()})
 	myWindow := myApp.NewWindow("Tip")
 
-	v := apps.AppVersion1
+	v := apps.AppVersion3
 	vl := widget.NewLabel(v.String())
 	vl.Alignment = fyne.TextAlignCenter
 	stuff, button := v.App()

@@ -1,4 +1,4 @@
-package apps
+package exp
 
 import (
 	"fmt"
@@ -40,7 +40,6 @@ func App1() (*fyne.Container, *widget.Button) {
 	stuff.Add(grid)
 
 	stuff.Add(widget.NewLabel(utils.O(fyne.CurrentDevice().Orientation()).String()))
-	stuff.Add(widget.NewLabel(AppVersion1.String()))
 
 	return stuff, button
 }

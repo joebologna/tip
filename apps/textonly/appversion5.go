@@ -1,10 +1,9 @@
-package apps
+package textonly
 
 import (
 	"fmt"
 	"image/color"
 	"os"
-	"strconv"
 	"strings"
 	"tip/utils"
 
@@ -107,15 +106,9 @@ func (s *Summary) Calculate(total utils.BS, ts *TipPercentSelector) {
 	s.totalEachLabel.SetText(fmt.Sprintf("%.2f", totalEach))
 }
 
-func ParseFloat32(s string) float32 {
-	num, err := strconv.ParseFloat(s, 32)
-	if err != nil {
-		return 0.0
-	}
-	return float32(num)
+func TipLabelToFactor(s string) float32 {
+	return utils.ParseFloat32(strings.ReplaceAll(s, "%", "")) / 100.0
 }
-
-func TipLabelToFactor(s string) float32 { return ParseFloat32(strings.ReplaceAll(s, "%", "")) / 100.0 }
 
 func NewCalcButton() fyne.CanvasObject {
 	l := widget.NewLabel("Calculate")
@@ -129,7 +122,7 @@ func NewCalcButton() fyne.CanvasObject {
 func calcNewTotal(list utils.BS) float32 {
 	total := float32(0)
 	for _, v := range strings.Split(list.GetS(), ",") {
-		total += ParseFloat32(v)
+		total += utils.ParseFloat32(v)
 	}
 	return total
 }

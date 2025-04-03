@@ -1,6 +1,9 @@
 package apps
 
 import (
+	"tip/apps/exp"
+	"tip/apps/textonly"
+
 	"fyne.io/fyne/v2"
 )
 
@@ -34,15 +37,15 @@ func (app AppVersion) String() string {
 func (v AppVersion) App() (stuff *fyne.Container, button fyne.CanvasObject) {
 	switch v {
 	case AppVersion1:
-		return App1()
+		return exp.App1()
 	case AppVersion2:
-		return App2()
+		return exp.App2()
 	case AppVersion3:
-		return App3()
+		return exp.App3()
 	case AppVersion4:
-		return App4()
+		return exp.App4()
 	case AppVersion5:
-		return App5()
+		return textonly.App5()
 	default:
 		panic("unsupported version")
 	}

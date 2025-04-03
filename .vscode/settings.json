@@ -5,6 +5,7 @@
         "fyne",
         "scroller",
         "stretchr",
-        "Tappable"
+        "Tappable",
+        "textonly"
     ]
 }

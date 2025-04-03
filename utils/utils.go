@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
@@ -73,3 +74,11 @@ type BS struct{ binding.String }
 func NewBS() BS { return BS{binding.NewString()} }
 
 func (s BS) GetS() string { t, _ := s.Get(); return t }
+
+func ParseFloat32(s string) float32 {
+	num, err := strconv.ParseFloat(s, 32)
+	if err != nil {
+		return 0.0
+	}
+	return float32(num)
+}
