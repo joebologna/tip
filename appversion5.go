@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"os"
 	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
@@ -101,20 +103,30 @@ func ParseFloat32(s string) float32 {
 
 func TipLabelToFactor(s string) float32 { return ParseFloat32(strings.ReplaceAll(s, "%", "")) / 100.0 }
 
+func NewCalcButton() fyne.CanvasObject {
+	l := widget.NewLabel("Calculate")
+	r := canvas.NewRectangle(color.Transparent)
+	r.StrokeColor = color.RGBA{128, 128, 128, 128}
+	r.StrokeWidth = 1
+	r.CornerRadius = 5
+	return container.NewStack(r, l)
+}
+
 func App5() (*fyne.Container, fyne.CanvasObject) {
 	total := NewBS()
 	summary := NewSummary()
 	te := NewTotalEntryWithData(total, summary)
 	tipSelector := NewTipSelector(te, func(ts *TipPercentSelector) {
-		fmt.Println(ts)
+		// fmt.Println(ts)
 		newTotal := ParseFloat32(total.get())
 		summary.Calculate(newTotal, ts)
 	})
 	te.ts = tipSelector
+	calcButton := NewCalcButton()
 	return container.NewBorder(
 		container.NewVBox(
 			tipSelector.RadioGroup,
-			container.NewGridWithColumns(2, te, widget.NewLabel("Calculate")),
+			container.NewGridWithColumns(2, te, container.NewHBox(calcButton, layout.NewSpacer())),
 			summary.summary,
 		),
 		nil,
