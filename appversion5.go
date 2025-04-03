@@ -62,7 +62,7 @@ func (te *TotalEntry) Keyboard() mobile.KeyboardType {
 func NewTotalEntryWithData(text BS, summary *Summary) *TotalEntry {
 	e := &TotalEntry{summary: summary}
 	e.Bind(text)
-	e.PlaceHolder = "Enter a list of amount using commas"
+	e.PlaceHolder = "Amounts w/commas"
 	e.Validator = nil
 	e.ExtendBaseWidget(e)
 	return e

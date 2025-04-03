@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 func main() {
@@ -11,9 +13,12 @@ func main() {
 	myApp.Settings().SetTheme(&CustomTheme{theme.DefaultTheme()})
 	myWindow := myApp.NewWindow("Tip")
 
-	stuff, button := AppVersion5.app()
+	v := AppVersion5
+	vl := widget.NewLabel(v.String())
+	vl.Alignment = fyne.TextAlignCenter
+	stuff, button := v.app()
 
-	myWindow.SetContent(container.NewBorder(stuff, button, nil, nil))
+	myWindow.SetContent(container.NewBorder(container.NewCenter(stuff), container.NewVBox(button, vl), nil, nil))
 
 	screenSize := GetScreenSize()
 	myWindow.Resize(screenSize)
