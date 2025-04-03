@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
@@ -54,9 +55,14 @@ type TotalEntry struct {
 	ts      *TipPercentSelector
 }
 
+func (te *TotalEntry) Keyboard() mobile.KeyboardType {
+	return mobile.SingleLineKeyboard
+}
+
 func NewTotalEntryWithData(text BS, summary *Summary) *TotalEntry {
 	e := &TotalEntry{summary: summary}
 	e.Bind(text)
+	e.PlaceHolder = "Enter a list of amount using commas"
 	e.Validator = nil
 	e.ExtendBaseWidget(e)
 	return e
@@ -69,28 +75,35 @@ func (e *TotalEntry) FocusLost() {
 }
 
 type Summary struct {
-	totalLabel, tipLabel, totalWithTipLabel *widget.Label
-	summary                                 fyne.CanvasObject
-	total, tip, totalWithTip                float32
+	totalLabel, tipLabel, totalWithTipLabel, splitByLabel, totalEachLabel *widget.Label
+	summary                                                               fyne.CanvasObject
+	total, tip, totalWithTip                                              float32
+	splitBy                                                               int
 }
 
 func NewSummary() *Summary {
-	s := &Summary{totalLabel: widget.NewLabel(""), tipLabel: widget.NewLabel(""), totalWithTipLabel: widget.NewLabel("")}
+	s := &Summary{totalLabel: widget.NewLabel(""), tipLabel: widget.NewLabel(""), totalWithTipLabel: widget.NewLabel(""), splitByLabel: widget.NewLabel(""), totalEachLabel: widget.NewLabel(""), splitBy: 1}
 	s.summary = container.NewVBox(
 		container.NewGridWithColumns(2, widget.NewLabel("Total:"), s.totalLabel),
 		container.NewGridWithColumns(2, widget.NewLabel("Tip:"), s.tipLabel),
 		container.NewGridWithColumns(2, widget.NewLabel("Total with Tip:"), s.totalWithTipLabel),
+		container.NewGridWithColumns(2, widget.NewLabel("Split by:"), s.splitByLabel),
+		container.NewGridWithColumns(2, widget.NewLabel("Total Each:"), s.totalEachLabel),
 	)
 	return s
 }
 
-func (s *Summary) Calculate(newTotal float32, ts *TipPercentSelector) {
-	s.total = newTotal
-	s.tip = newTotal * ts.curTipFactor
-	s.totalWithTip = newTotal * (1 + ts.curTipFactor)
+func (s *Summary) Calculate(total BS, ts *TipPercentSelector) {
+	s.total = calcNewTotal(total)
+	s.splitBy = len(strings.Split(total.get(), ","))
+	s.splitByLabel.SetText(fmt.Sprintf("%d", s.splitBy))
+	s.tip = s.total * ts.curTipFactor
+	s.totalWithTip = s.total * (1 + ts.curTipFactor)
 	s.totalLabel.SetText(fmt.Sprintf("%.2f", s.total))
 	s.tipLabel.SetText(fmt.Sprintf("%.2f", s.tip))
 	s.totalWithTipLabel.SetText(fmt.Sprintf("%.2f", s.totalWithTip))
+	totalEach := s.totalWithTip / float32(s.splitBy)
+	s.totalEachLabel.SetText(fmt.Sprintf("%.2f", totalEach))
 }
 
 func ParseFloat32(s string) float32 {
@@ -126,8 +139,7 @@ func App5() (*fyne.Container, fyne.CanvasObject) {
 	te := NewTotalEntryWithData(total, summary)
 	tipSelector := NewTipSelector(te, func(ts *TipPercentSelector) {
 		// fmt.Println(ts)
-		newTotal := calcNewTotal(total)
-		summary.Calculate(newTotal, ts)
+		summary.Calculate(total, ts)
 	})
 	te.ts = tipSelector
 	calcButton := NewCalcButton()
