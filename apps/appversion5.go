@@ -1,4 +1,4 @@
-package main
+package apps
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"tip/utils"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -59,7 +60,7 @@ func (te *TotalEntry) Keyboard() mobile.KeyboardType {
 	return mobile.SingleLineKeyboard
 }
 
-func NewTotalEntryWithData(text BS, summary *Summary) *TotalEntry {
+func NewTotalEntryWithData(text utils.BS, summary *Summary) *TotalEntry {
 	e := &TotalEntry{summary: summary}
 	e.Bind(text)
 	e.PlaceHolder = "Amounts w/commas"
@@ -93,9 +94,9 @@ func NewSummary() *Summary {
 	return s
 }
 
-func (s *Summary) Calculate(total BS, ts *TipPercentSelector) {
+func (s *Summary) Calculate(total utils.BS, ts *TipPercentSelector) {
 	s.total = calcNewTotal(total)
-	s.splitBy = len(strings.Split(total.get(), ","))
+	s.splitBy = len(strings.Split(total.GetS(), ","))
 	s.splitByLabel.SetText(fmt.Sprintf("%d", s.splitBy))
 	s.tip = s.total * ts.curTipFactor
 	s.totalWithTip = s.total * (1 + ts.curTipFactor)
@@ -125,16 +126,16 @@ func NewCalcButton() fyne.CanvasObject {
 	return container.NewStack(r, l)
 }
 
-func calcNewTotal(list BS) float32 {
+func calcNewTotal(list utils.BS) float32 {
 	total := float32(0)
-	for _, v := range strings.Split(list.get(), ",") {
+	for _, v := range strings.Split(list.GetS(), ",") {
 		total += ParseFloat32(v)
 	}
 	return total
 }
 
 func App5() (*fyne.Container, fyne.CanvasObject) {
-	total := NewBS()
+	total := utils.NewBS()
 	summary := NewSummary()
 	te := NewTotalEntryWithData(total, summary)
 	tipSelector := NewTipSelector(te, func(ts *TipPercentSelector) {

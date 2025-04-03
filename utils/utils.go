@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -47,7 +47,7 @@ func (o O) String() string {
 	return ""
 }
 
-func evalFloat(e string) float32 {
+func EvalFloat(e string) float32 {
 	ee, err := govaluate.NewEvaluableExpression(e)
 	if err != nil {
 		return 0.0
@@ -72,4 +72,4 @@ type BS struct{ binding.String }
 
 func NewBS() BS { return BS{binding.NewString()} }
 
-func (s BS) get() string { t, _ := s.Get(); return t }
+func (s BS) GetS() string { t, _ := s.Get(); return t }

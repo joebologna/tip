@@ -1,7 +1,8 @@
-package main
+package apps
 
 import (
 	"fmt"
+	"tip/utils"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -38,7 +39,7 @@ func App1() (*fyne.Container, *widget.Button) {
 	grid := container.NewAdaptiveGrid(cols, entries...)
 	stuff.Add(grid)
 
-	stuff.Add(widget.NewLabel(O(fyne.CurrentDevice().Orientation()).String()))
+	stuff.Add(widget.NewLabel(utils.O(fyne.CurrentDevice().Orientation()).String()))
 	stuff.Add(widget.NewLabel(AppVersion1.String()))
 
 	return stuff, button

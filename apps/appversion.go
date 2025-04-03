@@ -1,4 +1,4 @@
-package main
+package apps
 
 import (
 	"fyne.io/fyne/v2"
@@ -31,7 +31,7 @@ func (app AppVersion) String() string {
 	}
 }
 
-func (v AppVersion) app() (stuff *fyne.Container, button fyne.CanvasObject) {
+func (v AppVersion) App() (stuff *fyne.Container, button fyne.CanvasObject) {
 	switch v {
 	case AppVersion1:
 		return App1()
