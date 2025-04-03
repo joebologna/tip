@@ -112,13 +112,21 @@ func NewCalcButton() fyne.CanvasObject {
 	return container.NewStack(r, l)
 }
 
+func calcNewTotal(list BS) float32 {
+	total := float32(0)
+	for _, v := range strings.Split(list.get(), ",") {
+		total += ParseFloat32(v)
+	}
+	return total
+}
+
 func App5() (*fyne.Container, fyne.CanvasObject) {
 	total := NewBS()
 	summary := NewSummary()
 	te := NewTotalEntryWithData(total, summary)
 	tipSelector := NewTipSelector(te, func(ts *TipPercentSelector) {
 		// fmt.Println(ts)
-		newTotal := ParseFloat32(total.get())
+		newTotal := calcNewTotal(total)
 		summary.Calculate(newTotal, ts)
 	})
 	te.ts = tipSelector
