@@ -48,28 +48,21 @@ func NewTipSelector(te *TotalEntry, calculate func(ts *TipPercentSelector)) *Tip
 
 type TotalEntry struct {
 	widget.Entry
-	text    BS
-	total   func() float32
 	summary *Summary
 	ts      *TipPercentSelector
 }
 
-func NewTotalEntryWithData(text BS, summary *Summary, ts *TipPercentSelector) *TotalEntry {
-	var e *TotalEntry
-	e = &TotalEntry{text: text, summary: summary, ts: ts, total: func() float32 {
-		return ParseFloat32(e.text.get())
-	}}
+func NewTotalEntryWithData(text BS, summary *Summary) *TotalEntry {
+	e := &TotalEntry{summary: summary}
 	e.Bind(text)
-	e.text = text
 	e.Validator = nil
 	e.ExtendBaseWidget(e)
 	return e
 }
 
 func (e *TotalEntry) FocusLost() {
-	newTotal := ParseFloat32(e.text.get())
-	e.summary.Calculate(newTotal, e.ts)
 	// this is needed to trigger the hide the cursor and remove highlight
+	e.ts.Calculate()
 	e.Entry.FocusLost()
 }
 
@@ -109,18 +102,19 @@ func ParseFloat32(s string) float32 {
 func TipLabelToFactor(s string) float32 { return ParseFloat32(strings.ReplaceAll(s, "%", "")) / 100.0 }
 
 func App5() (*fyne.Container, fyne.CanvasObject) {
-	var summary *Summary = NewSummary()
-	var tipSelector *TipPercentSelector
-	var te *TotalEntry = NewTotalEntryWithData(NewBS(), summary, tipSelector)
-	tipSelector = NewTipSelector(te, func(ts *TipPercentSelector) {
+	total := NewBS()
+	summary := NewSummary()
+	te := NewTotalEntryWithData(total, summary)
+	tipSelector := NewTipSelector(te, func(ts *TipPercentSelector) {
 		fmt.Println(ts)
-		newTotal := ParseFloat32(te.text.get())
+		newTotal := ParseFloat32(total.get())
 		summary.Calculate(newTotal, ts)
 	})
+	te.ts = tipSelector
 	return container.NewBorder(
 		container.NewVBox(
 			tipSelector.RadioGroup,
-			te,
+			container.NewGridWithColumns(2, te, widget.NewLabel("Calculate")),
 			summary.summary,
 		),
 		nil,
