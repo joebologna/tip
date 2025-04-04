@@ -20,13 +20,11 @@ func App6() (*fyne.Container, *widget.Button) {
 	entry := widget.NewEntryWithData(entryString)
 	entry.Validator = nil
 
-	billTitle, tipTitle, totalTitle := widget.NewLabel("Bill"), widget.NewLabel("Tip"), widget.NewLabel("Total")
+	billTitle, tipTitle, totalTitle := NewThemedLabel("Bill"), NewThemedLabel("Tip"), NewThemedLabel("Total")
 	billTitle.Alignment, tipTitle.Alignment, totalTitle.Alignment = fyne.TextAlignCenter, fyne.TextAlignCenter, fyne.TextAlignCenter
 
-	theBill, theTip, theTotal := widget.NewLabelWithData(bill), widget.NewLabelWithData(tip), widget.NewLabelWithData(total)
+	theBill, theTip, theTotal := NewThemedLabelWithData(bill), NewThemedLabelWithData(tip), NewThemedLabelWithData(total)
 	theBill.Alignment, theTip.Alignment, theTotal.Alignment = fyne.TextAlignTrailing, fyne.TextAlignTrailing, fyne.TextAlignTrailing
-	theBillLens, theTipLens, theTotalLens := canvas.NewRectangle(color.Transparent), canvas.NewRectangle(color.Transparent), canvas.NewRectangle(color.Transparent)
-	theBillLens.StrokeWidth, theTipLens.StrokeWidth, theTotalLens.StrokeWidth = 1, 1, 1
 
 	stuff := container.NewVBox(entry)
 	keys := make([]fyne.CanvasObject, 0)
@@ -39,20 +37,20 @@ func App6() (*fyne.Container, *widget.Button) {
 					s = s[:n-1]
 					entryString.Set(s)
 				}
-				pending(true, theBillLens, theTipLens, theTotalLens)
+				pending(true, theBill, theTip, theTotal)
 			} else if key == "AC" {
 				entryString.Set("")
 				calc(bill, 0.0, tip, total)
-				pending(true, theBillLens, theTipLens, theTotalLens)
+				pending(true, theBill, theTip, theTotal)
 			} else if key == "Calc" {
 				sum := float32(0)
 				for _, v := range strings.Split(entryString.GetS(), ",") {
 					sum += utils.ParseFloat32(v)
 				}
 				calc(bill, sum, tip, total)
-				pending(false, theBillLens, theTipLens, theTotalLens)
+				pending(false, theBill, theTip, theTotal)
 			} else {
-				pending(true, theBillLens, theTipLens, theTotalLens)
+				pending(true, theBill, theTip, theTotal)
 				s := entryString.GetS()
 				s += key
 				entryString.Set(s)
@@ -61,11 +59,14 @@ func App6() (*fyne.Container, *widget.Button) {
 		keys = append(keys, b)
 	}
 	stuff.Add(container.NewGridWithColumns(3, keys...))
-	stuff.Add(container.NewGridWithColumns(3, billTitle, tipTitle, totalTitle))
-	stuff.Add(container.NewGridWithColumns(3, container.NewStack(theBillLens, theBill), container.NewStack(theTipLens, theTip), container.NewStack(theTotalLens, theTotal)))
+	stuff.Add(container.NewGridWithColumns(3, billTitle.Stack(), tipTitle.Stack(), totalTitle.Stack()))
+	stuff.Add(container.NewGridWithColumns(3, theBill.Stack(), theTip.Stack(), theTotal.Stack()))
 	calc(bill, 0.0, tip, total)
-	pending(false, theBillLens, theTipLens, theTotalLens)
-	return stuff, widget.NewButton("Bye", func() { os.Exit(0) })
+	pending(false, theBill, theTip, theTotal)
+	bg := canvas.NewRectangle(color.Transparent)
+	bg.StrokeWidth = 2
+	bg.StrokeColor = color.RGBA{128, 128, 128, 128}
+	return container.NewStack(stuff, bg), widget.NewButton("Bye", func() { os.Exit(0) })
 }
 
 func calc(bill utils.BS, sum float32, tip utils.BS, total utils.BS) {
@@ -74,10 +75,31 @@ func calc(bill utils.BS, sum float32, tip utils.BS, total utils.BS) {
 	total.Set(fmt.Sprintf("%.2f", sum*1.20))
 }
 
-func pending(isPending bool, theBillLens, theTipLens, theTotalLens *canvas.Rectangle) {
+func pending(isPending bool, theBillLens, theTipLens, theTotalLens *ThemedLabel) {
 	if isPending {
-		theBillLens.StrokeColor, theTipLens.StrokeColor, theTotalLens.StrokeColor = RED, RED, RED
+		theBillLens.overlay.StrokeColor, theTipLens.overlay.StrokeColor, theTotalLens.overlay.StrokeColor = RED, RED, RED
 	} else {
-		theBillLens.StrokeColor, theTipLens.StrokeColor, theTotalLens.StrokeColor = GREEN, GREEN, GREEN
+		theBillLens.overlay.StrokeColor, theTipLens.overlay.StrokeColor, theTotalLens.overlay.StrokeColor = GREEN, GREEN, GREEN
 	}
+}
+
+type ThemedLabel struct {
+	*widget.Label
+	overlay *canvas.Rectangle
+}
+
+func NewThemedLabel(text string) *ThemedLabel {
+	l := &ThemedLabel{Label: widget.NewLabel(text), overlay: canvas.NewRectangle(GREEN)}
+	l.overlay.StrokeWidth = 1
+	return l
+}
+
+func NewThemedLabelWithData(text utils.BS) *ThemedLabel {
+	l := &ThemedLabel{Label: widget.NewLabelWithData(text), overlay: canvas.NewRectangle(color.Transparent)}
+	l.overlay.StrokeWidth = 1
+	return l
+}
+
+func (t *ThemedLabel) Stack() fyne.CanvasObject {
+	return container.NewStack(t.overlay, t.Label)
 }
