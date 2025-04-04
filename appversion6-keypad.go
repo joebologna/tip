@@ -16,6 +16,8 @@ import (
 var RED, GREEN = color.RGBA{255, 0, 0, 128}, color.RGBA{0, 255, 0, 128}
 
 func App6() (*fyne.Container, *widget.Button) {
+	var tipSelector *widget.RadioGroup
+
 	entryString, bill, tip, total := utils.NewBS(), utils.NewBS(), utils.NewBS(), utils.NewBS()
 	entry := widget.NewEntryWithData(entryString)
 	entry.Validator = nil
@@ -40,14 +42,10 @@ func App6() (*fyne.Container, *widget.Button) {
 				pending(true, theBill, theTip, theTotal)
 			} else if key == "AC" {
 				entryString.Set("")
-				calc(bill, 0.0, tip, total)
-				pending(true, theBill, theTip, theTotal)
+				doCalc(entryString, bill, tipSelector, tip, total)
+				pending(false, theBill, theTip, theTotal)
 			} else if key == "Calc" {
-				sum := float32(0)
-				for _, v := range strings.Split(entryString.GetS(), ",") {
-					sum += utils.ParseFloat32(v)
-				}
-				calc(bill, sum, tip, total)
+				doCalc(entryString, bill, tipSelector, tip, total)
 				pending(false, theBill, theTip, theTotal)
 			} else {
 				pending(true, theBill, theTip, theTotal)
@@ -58,21 +56,43 @@ func App6() (*fyne.Container, *widget.Button) {
 		})
 		keys = append(keys, b)
 	}
+
+	// tipSelector := NewTipPercentSelector2()
+
+	tipSelector = widget.NewRadioGroup([]string{"10%", "15%", "20%", "25%"}, func(cur_selection string) {
+		doCalc(entryString, bill, tipSelector, tip, total)
+		pending(false, theBill, theTip, theTotal)
+	})
+	tipSelector.Horizontal = true
+	tipSelector.SetSelected("20%")
+
+	stuff.Add(container.NewCenter(tipSelector))
 	stuff.Add(container.NewGridWithColumns(3, keys...))
 	stuff.Add(container.NewGridWithColumns(3, billTitle.Stack(), tipTitle.Stack(), totalTitle.Stack()))
 	stuff.Add(container.NewGridWithColumns(3, theBill.Stack(), theTip.Stack(), theTotal.Stack()))
-	calc(bill, 0.0, tip, total)
+
+	calc(bill, TipFactor(tipSelector.Selected), 0.0, tip, total)
 	pending(false, theBill, theTip, theTotal)
+
 	bg := canvas.NewRectangle(color.Transparent)
 	bg.StrokeWidth = 2
 	bg.StrokeColor = color.RGBA{128, 128, 128, 128}
+
 	return container.NewStack(stuff, bg), widget.NewButton("Bye", func() { os.Exit(0) })
 }
 
-func calc(bill utils.BS, sum float32, tip utils.BS, total utils.BS) {
+func doCalc(entryString utils.BS, bill utils.BS, tipSelector *widget.RadioGroup, tip utils.BS, total utils.BS) {
+	sum := float32(0)
+	for _, v := range strings.Split(entryString.GetS(), ",") {
+		sum += utils.ParseFloat32(v)
+	}
+	calc(bill, TipFactor(tipSelector.Selected), sum, tip, total)
+}
+
+func calc(bill utils.BS, percent float32, sum float32, tip utils.BS, total utils.BS) {
 	bill.Set(fmt.Sprintf("%.2f", sum))
-	tip.Set(fmt.Sprintf("%.2f", sum*0.20))
-	total.Set(fmt.Sprintf("%.2f", sum*1.20))
+	tip.Set(fmt.Sprintf("%.2f", sum*percent))
+	total.Set(fmt.Sprintf("%.2f", sum*(1+percent)))
 }
 
 func pending(isPending bool, theBillLens, theTipLens, theTotalLens *ThemedLabel) {
@@ -102,4 +122,8 @@ func NewThemedLabelWithData(text utils.BS) *ThemedLabel {
 
 func (t *ThemedLabel) Stack() fyne.CanvasObject {
 	return container.NewStack(t.overlay, t.Label)
+}
+
+func TipFactor(s string) float32 {
+	return utils.ParseFloat32(strings.ReplaceAll(s, "%", "")) / 100.0
 }

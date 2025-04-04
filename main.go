@@ -20,7 +20,7 @@ func main() {
 	vl.Alignment = fyne.TextAlignCenter
 	stuff, button := v.App()
 
-	myWindow.SetContent(container.NewBorder(container.NewCenter(stuff), container.NewVBox(button, vl), nil, nil))
+	myWindow.SetContent(container.NewBorder(stuff, container.NewVBox(button, vl), nil, nil))
 
 	screenSize := utils.GetScreenSize()
 	myWindow.Resize(screenSize)

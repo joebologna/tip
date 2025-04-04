@@ -27,7 +27,7 @@ func GetScreenSize() fyne.Size {
 	if o == fyne.OrientationVertical || o == fyne.OrientationVerticalUpsideDown {
 		return fyne.NewSize(768, 1024)
 	}
-	return fyne.NewSize(768, 1024)
+	return fyne.NewSize(768/2, 1024)
 }
 
 type O fyne.DeviceOrientation
