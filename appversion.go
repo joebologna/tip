@@ -2,6 +2,7 @@ package main
 
 import (
 	"tip/apps/exp"
+	"tip/apps/keypad"
 	"tip/apps/textonly"
 
 	"fyne.io/fyne/v2"
@@ -50,7 +51,7 @@ func (v AppVersion) App() (stuff *fyne.Container, button fyne.CanvasObject) {
 	case AppVersion5:
 		return textonly.App5()
 	case AppVersion6:
-		return App6()
+		return keypad.App6()
 	default:
 		panic("unsupported version")
 	}
