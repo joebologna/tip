@@ -29,6 +29,7 @@ func App6() (*fyne.Container, *widget.Button) {
 	theBill.Alignment, theTip.Alignment, theTotal.Alignment = fyne.TextAlignTrailing, fyne.TextAlignTrailing, fyne.TextAlignTrailing
 
 	stuff := container.NewVBox(entry)
+
 	keys := make([]fyne.CanvasObject, 0)
 	for _, key := range []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", ",", "AC", "Calc", "DEL"} {
 		b := widget.NewButton(" "+key+" ", func() {
@@ -56,8 +57,6 @@ func App6() (*fyne.Container, *widget.Button) {
 		})
 		keys = append(keys, b)
 	}
-
-	// tipSelector := NewTipPercentSelector2()
 
 	tipSelector = widget.NewRadioGroup([]string{"10%", "15%", "20%", "25%"}, func(cur_selection string) {
 		doCalc(entryString, bill, tipSelector, tip, total)
