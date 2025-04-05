@@ -17,6 +17,7 @@ const (
 	AppVersion4
 	AppVersion5
 	AppVersion6
+	AppVersion7
 )
 
 func (app AppVersion) String() string {
@@ -33,6 +34,8 @@ func (app AppVersion) String() string {
 		return "V5"
 	case AppVersion6:
 		return "V6"
+	case AppVersion7:
+		return "V7"
 	default:
 		return "Unknown"
 	}
@@ -52,6 +55,8 @@ func (v AppVersion) App() (stuff *fyne.Container, button fyne.CanvasObject) {
 		return textonly.App5()
 	case AppVersion6:
 		return keypad.App6()
+	case AppVersion7:
+		return exp.App7()
 	default:
 		panic("unsupported version")
 	}
