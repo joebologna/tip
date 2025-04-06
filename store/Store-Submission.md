@@ -26,3 +26,8 @@ These are the original files used to submit to the app store using Transmission.
 These are new files used to submit to the app store using Transmission.app. They were created in an attempt to fix verification errors. These files are equivalent the previous ones.
 
 Note: the .cer file must be installed using Keychain Access.
+
+xcodebuild -target "${PROJECT_NAME}" -sdk "${TARGET_SDK}" -configuration Release
+/usr/bin/xcrun -sdk iphoneos PackageApplication -v "${RELEASE_BUILDDIR}/${APPLICATION_NAME}.app" -o "${BUILD_HISTORY_DIR}/${APPLICATION_NAME}.ipa" --sign "${DEVELOPER_NAME}" --embed "${PROVISONING_PROFILE}”
+
+TODO: Clean up the Distribution certificates, create a new one, check that it has the submission extension, package and check with Transmission app.
