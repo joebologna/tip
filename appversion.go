@@ -3,6 +3,7 @@ package main
 import (
 	"tip/apps/exp"
 	"tip/apps/keypad"
+	"tip/apps/keypadonly"
 	"tip/apps/textonly"
 
 	"fyne.io/fyne/v2"
@@ -18,6 +19,7 @@ const (
 	AppVersion5
 	AppVersion6
 	AppVersion7
+	AppVersion8
 )
 
 func (app AppVersion) String() string {
@@ -36,6 +38,8 @@ func (app AppVersion) String() string {
 		return "V6"
 	case AppVersion7:
 		return "V7"
+	case AppVersion8:
+		return "V8"
 	default:
 		return "Unknown"
 	}
@@ -57,6 +61,8 @@ func (v AppVersion) App() (stuff *fyne.Container, button fyne.CanvasObject) {
 		return keypad.App6()
 	case AppVersion7:
 		return exp.App7()
+	case AppVersion8:
+		return keypadonly.App8(), nil
 	default:
 		panic("unsupported version")
 	}

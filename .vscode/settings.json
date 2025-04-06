@@ -3,6 +3,7 @@
         "elementname",
         "elementnames",
         "fyne",
+        "keypadonly",
         "scroller",
         "stretchr",
         "Tappable",
