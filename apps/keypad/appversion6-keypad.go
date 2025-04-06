@@ -47,6 +47,7 @@ func App6() (*fyne.Container, *widget.Button) {
 				pending(true, theBill, theTip, theTotal, theBillEach, theTipEach, theTotalEach)
 			} else if key == "AC" {
 				entryString.Set("")
+				splitSelector.SetSelected("1")
 				doCalc(entryString, bill, tipSelector, splitSelector, tip, total, billEach, tipEach, totalEach)
 				pending(false, theBill, theTip, theTotal, theBillEach, theTipEach, theTotalEach)
 			} else if key == "Calc" {
