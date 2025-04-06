@@ -4,5 +4,5 @@ Website = "https://new-norm.com"
   Icon = "tip-icon.png"
   Name = "tip"
   ID = "com.focusedforsuccess.Tip-Calculator"
-  Version = "1.0.0"
-  Build = 43
+  Version = "2.0"
+  Build = 19

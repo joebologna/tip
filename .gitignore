@@ -5,3 +5,6 @@ __debug_bin*
 *.pyc
 *.app
 *.mobileprovision
+*.certSigningRequest
+*.cer
+*.ipa
