@@ -11,11 +11,5 @@ dist:
 	fyne package -os ios -certificate "Apple Distribution: Focused for Success, Inc. (2GC862GT48)" -profile "Tip App Store"
 
 app_store:
-	../fyne/cmd/fyne/fyne package -os ios -certificate "Apple Distribution: Focused for Success, Inc. (2GC862GT48)" -profile "Tip App Store" -release
-	find . -name .DS_Store | xargs rm
-	rm -fr store/Payload/tip.app
-	mv tip.app store/Payload/tip.app
-	codesign --remove-signature store/Payload/tip.app
-	codesign --sign "Apple Distribution: Focused for Success, Inc. (2GC862GT48)" --entitlements store/tip.entitlements store/Payload/tip.app
-	codesign --verify --deep --strict -vvv store/Payload/tip.app
-	cd store; zip -r tip.ipa Payload
+	../fyne/cmd/fyne/fyne package -work -os ios -certificate "Apple Distribution: Focused for Success, Inc. (2GC862GT48)" -profile "Tip App Store" -release
+	@echo open Xcode project, run gen_icons.sh, install the icons, update the project to use the Tip App Store provisioning profile, run Archive
