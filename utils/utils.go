@@ -1,12 +1,10 @@
 package utils
 
 import (
-	"fmt"
 	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
-	"github.com/Knetic/govaluate"
 )
 
 func GetDeviceType() (is_mobile, is_browser, is_desktop bool) {
@@ -28,45 +26,6 @@ func GetScreenSize() fyne.Size {
 		return fyne.NewSize(768, 1024)
 	}
 	return fyne.NewSize(768/2, 1024)
-}
-
-type O fyne.DeviceOrientation
-
-func (o O) String() string {
-	if o == O(fyne.OrientationHorizontalLeft) {
-		return "OrientationHorizontalLeft"
-	}
-	if o == O(fyne.OrientationHorizontalRight) {
-		return "OrientationHorizontalRight"
-	}
-	if o == O(fyne.OrientationVertical) {
-		return "OrientationVertical"
-	}
-	if o == O(fyne.OrientationVerticalUpsideDown) {
-		return "OrientationVerticalUpsideDown"
-	}
-	return ""
-}
-
-func EvalFloat(e string) float32 {
-	ee, err := govaluate.NewEvaluableExpression(e)
-	if err != nil {
-		return 0.0
-	}
-	result, err := ee.Evaluate(nil)
-	if err != nil {
-		return 0.0
-	}
-	// Handle different possible types of the result
-	switch v := result.(type) {
-	case float64:
-		return float32(v)
-	case int:
-		return float32(v)
-	default:
-		fmt.Println("Unexpected result type:", v)
-		return 0.0
-	}
 }
 
 type BS struct{ binding.String }
